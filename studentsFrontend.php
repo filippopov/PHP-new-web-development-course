@@ -66,6 +66,7 @@
         <?php endif; ?>
         <a href="students.php?page=<?=$page + 1 ?>&<?=$urlData?>">[Next]</a>
     <?php endif; ?>
+    
 <?php endif; ?>
 
 
