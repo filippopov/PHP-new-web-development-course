@@ -4,6 +4,7 @@ session_start();
 include 'database.php';
 
 $error = isset($_GET['error']) ? $_GET['error'] : '';
+$success = isset($_GET['success']) ? $_GET['success'] : '';
 
 if (! empty($_POST)) {
     $username = isset($_POST['username']) ? $_POST['username'] : '';

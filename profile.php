@@ -26,4 +26,8 @@ $result = $birthday->diff($now);
 $dayBeforBurthday = $result->days;
 
 
+
+
 include 'profile_frontend.php';
+
+
