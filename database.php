@@ -48,4 +48,12 @@ $users = array (
     'full_name' => 'Filip Popov',
     'role' => 'admin',
   ),
+  'test12' => 
+  array (
+    'password' => '123',
+    'email' => '',
+    'birthday' => '',
+    'full_name' => 'sfwefw',
+    'role' => 'user',
+  ),
 );
