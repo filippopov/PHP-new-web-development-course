@@ -1,35 +1,11 @@
 <?php
 $users = array (
-  'Ivan123' => 
-  array (
-    'password' => '123',
-    'email' => 'ivan@mail.bg',
-    'birthday' => '01-11-1984',
-    'full_name' => 'Ivan Ivanov',
-    'role' => 'user',
-  ),
-  'Sasho' => 
-  array (
-    'password' => '123',
-    'email' => 'sasho@ala.bg',
-    'birthday' => '12-06-1984',
-    'full_name' => 'Aleksandur Pavlov',
-    'role' => 'user',
-  ),
   'Gosho' => 
   array (
     'password' => '123',
     'email' => '',
     'birthday' => '',
     'full_name' => 'wefwef',
-    'role' => 'user',
-  ),
-  'test' => 
-  array (
-    'password' => '123',
-    'email' => '',
-    'birthday' => '',
-    'full_name' => 'test',
     'role' => 'user',
   ),
   'Goro1' => 
@@ -48,12 +24,20 @@ $users = array (
     'full_name' => 'Filip Popov',
     'role' => 'admin',
   ),
-  'test12' => 
+  'Ivan12345' => 
   array (
     'password' => '123',
-    'email' => '',
-    'birthday' => '',
-    'full_name' => 'sfwefw',
+    'email' => 'fili@abv.bg12',
+    'birthday' => '15-08-1985',
+    'full_name' => 'Ivan Ivanov',
+    'role' => 'user',
+  ),
+  'Sasho1' => 
+  array (
+    'password' => '123',
+    'email' => 'fili@abv.bg12',
+    'birthday' => '15-08-1985',
+    'full_name' => 'Aleksandur Pavlov',
     'role' => 'user',
   ),
 );

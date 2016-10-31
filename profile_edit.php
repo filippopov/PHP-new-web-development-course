@@ -15,6 +15,7 @@ $fullName = $userInfo['full_name'];
 $error = isset($_GET['error']) ? $_GET['error'] : '';
 $success = isset($_GET['success']) ? $_GET['success'] : '';
 
+$adminEdit = isset($_GET['adminEdit']) ? $_GET['adminEdit'] : '';
 
 //if (! empty($_POST)) {
 //    $editUser = $_POST['username'];
@@ -68,6 +69,13 @@ $success = isset($_GET['success']) ? $_GET['success'] : '';
 //    }
 //}
 
+$adminUri = '';
+
+if(! empty($adminEdit)) {
+    $username = $adminEdit;
+    $adminUri = "adminEdit=$username&";
+}
+
 
 if (! empty($_POST)) {
     $userLifeCycle = new UserLifecycle();
@@ -75,17 +83,17 @@ if (! empty($_POST)) {
     $result = false;
 
     try {
-        $result = $userLifeCycle->edit($_SESSION['user'], $_POST, $_SESSION);
+        $result = $userLifeCycle->edit($username, $_POST, $_SESSION);
     } catch (Exception $e) {
-        header('Location: profile_edit.php?error=' . $e->getMessage());
+        header('Location: profile_edit.php?' . $adminUri . 'error=' . $e->getMessage());
         exit;
     }
 
     if (! $result) {
-        header('Location: profile_edit.php?error=Sorry but your data can not be update');
+        header('Location: profile_edit.php?' . $adminUri . 'error=Sorry but your data can not be update');
         exit;
     } else {
-        header('Location: profile_edit.php?success=Edit Successfully');
+        header('Location: profile_edit.php?' . $adminUri . 'success=Edit Successfully');
         exit;
     }
 }

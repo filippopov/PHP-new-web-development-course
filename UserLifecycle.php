@@ -61,6 +61,19 @@ class UserLifecycle
         return $role;
     }
 
+    public function delete(string $username) : bool
+    {
+        unset($this->data[$username]);
+
+        $usersAsText = var_export($this->data, true);
+
+        $declaration = '<?php' . PHP_EOL . '$users = ' . $usersAsText . ';';
+
+        $result = file_put_contents('database.php', $declaration);
+
+        return $result !== false;
+    }
+
     public function edit(string $username, array $data, array &$userInfo) : bool
     {
         $role = $this->getRole($username);
