@@ -6,79 +6,39 @@ include 'database.php';
 include 'UserLifecycle.php';
 
 $error = isset($_GET['error']) ? $_GET['error'] : '';
-
-//if (! empty($_POST)) {
-//    $user = $_POST['username'];
-//    $password = $_POST['password'];
-//    $passwordConfirm = $_POST['confirm'];
-//    $email = $_POST['email'];
-//    $birthday = $_POST['birthday'];
-//    $fullName = $_POST['full_name'];
-//
-//    if (empty($user)) {
-//        header('Location: register.php?error=Please enter username');
-//        exit;
-//    }
-//
-//    if (empty($password)) {
-//        header('Location: register.php?error=Please enter password');
-//        exit;
-//    }
-//
-//    if (empty($fullName)) {
-//        header('Location: register.php?error=Please enter full name');
-//        exit;
-//    }
-//
-//    if ($password != $passwordConfirm) {
-//        header('Location: register.php?error=Password and Confirm password do not match');
-//        exit;
-//    }
-//
-//    if(array_key_exists($user, $users)) {
-//        header('Location: register.php?error=This username already exist');
-//        exit;
-//    }
-//
-//    $users[$user] = [
-//        'password' => $password,
-//        'email' => $email,
-//        'birthday' => $birthday,
-//        'full_name' => $fullName
-//    ];
-//
-//    $usersAsText = var_export($users, true);
-//
-//    $declaration = '<?php' . PHP_EOL . '$users = ' . $usersAsText . ';';
-//
-//    $result = file_put_contents('database.php', $declaration);
-//
-//    if (! $result) {
-//        header('Location: register.php?error=Sorry but register user failed');
-//        exit;
-//    } else {
-//        header('Location: login.php?success=Create user Successfully');
-//        exit;
-//    }
-//}
+$lifeCycle = new UserLifecycle();
 
 if(! empty($_POST)) {
-    $lifeCycle = new UserLifecycle();
+    $birthday = new DateTime($_POST['birthday']);
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+    $email = $_POST['email'];
+    $fullName = $_POST['full_name'];
+    $confirmPassword = $_POST['confirm'];
 
-    $result = false;
-
-    try {
-        $result = $lifeCycle->register($_POST);
-    } catch (Exception $e) {
-        header('Location: register.php?error=' . $e->getMessage());
+    if (empty($username)) {
+        header('Location: register.php?error=Please enter username');
+        exit;
+    } elseif (empty($password)) {
+        header('Location: register.php?error=Please enter password');
+        exit;
+    } elseif (empty($fullName)) {
+        header('Location: register.php?error=Please enter full name');
         exit;
     }
 
-    if (! $result) {
-        header('Location: register.php?error=Sorry but register user failed');
+    if ($password != $confirmPassword) {
+        header('Location: register.php?error=Password and confirm password are not the same');
+        exit;
+    }
+
+    $result = $lifeCycle->register($_POST['username'], $_POST['password'], $_POST['email'], $_POST['full_name'], $birthday);
+
+    if ($result) {
+        header('Location: login.php?success=Create user Successfully');
         exit;
     } else {
-        header('Location: login.php?success=Create user Successfully');
+        header('Location: register.php?error=Sorry but register user failed');
         exit;
     }
 }

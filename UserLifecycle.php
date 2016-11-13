@@ -3,165 +3,250 @@
 
 class UserLifecycle
 {
-    private $data = [];
 
-    public function __construct()
+    const IS_ACTIVE = 1;
+    const USER = 'user';
+
+    /**
+     * @var PDO
+     */
+    private $db = null;
+
+    public function __construct(PDO $db)
     {
-        include 'database.php';
-        $this->data = $users;
+        $this->db = $db;
     }
 
     public function getEmail(string $username) : string
     {
-        $aUsers = $this->data;
+        $sql = "
+            SELECT 
+                email
+            FROM
+               users
+            WHERE 
+              username = ?
+        ";
 
-        $user = isset($aUsers[$username]) ? $aUsers[$username] : array();
-        $email = isset($user['email']) ? $user['email'] : '';
+        $statement = $this->db->prepare($sql);
 
-        return $email;
+        $statement->execute([$username]);
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $result['email'];
     }
 
     public function getPassword(string $username) : string
     {
-        $aUsers = $this->data;
+        $sql = "
+            SELECT
+                password
+            FROM
+                users
+            WHERE 
+               username = ?
+        ";
 
-        $user = isset($aUsers[$username]) ? $aUsers[$username] : array();
-        $password = isset($user['password']) ? $user['password'] : '';
+        $statement = $this->db->prepare($sql);
 
-        return $password;
+        $statement->execute([$username]);
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $result['password'];
     }
 
     public function getFullName(string $username) : string
     {
-        $aUsers = $this->data;
+        $sql = "
+            SELECT
+                full_name
+            FROM
+                users
+            WHERE 
+               username = ?
+        ";
 
-        $user = isset($aUsers[$username]) ? $aUsers[$username] : array();
-        $fullName = isset($user['full_name']) ? $user['full_name'] : '';
+        $statement = $this->db->prepare($sql);
 
-        return $fullName;
+        $statement->execute([$username]);
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $result['full_name'];
     }
 
     public function getBirthday(string $username) : string
     {
-        $aUsers = $this->data;
+        $sql = "
+            SELECT
+                birthday
+            FROM
+                users
+            WHERE
+                username = ?
+        ";
 
-        $user = isset($aUsers[$username]) ? $aUsers[$username] : array();
-        $birthday = isset($user['birthday']) ? $user['birthday'] : '';
+        $statement = $this->db->prepare($sql);
 
-        return $birthday;
+        $statement->execute([$username]);
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $result['birthday'];
     }
 
     public function getRole(string $username) : string
     {
-        $aUsers = $this->data;
+        $sql = "
+            SELECT
+                role
+            FROM
+                users
+            WHERE
+                username = ?
+        ";
 
-        $user = isset($aUsers[$username]) ? $aUsers[$username] : array();
-        $role = isset($user['role']) ? $user['role'] : '';
+        $statement = $this->db->prepare($sql);
 
-        return $role;
+        $statement->execute([$username]);
+
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $result['role'];
     }
 
     public function delete(string $username) : bool
     {
-        unset($this->data[$username]);
+        $sql = "
+            DELETE
+            FROM
+                users
+            WHERE
+               username = ? 
+        ";
 
-        $usersAsText = var_export($this->data, true);
+        $statement = $this->db->prepare($sql);
 
-        $declaration = '<?php' . PHP_EOL . '$users = ' . $usersAsText . ';';
+        $statement->execute([$username]);
 
-        $result = file_put_contents('database.php', $declaration);
+        $result = $statement->fetch();
 
-        return $result !== false;
+        return $result;
     }
 
     public function edit(string $username, array $data, array &$userInfo) : bool
     {
-        $role = $this->getRole($username);
-
-        $newUser = $data['username'];
-
-        if ($data['password'] != $data['confirm']) {
-            throw new Exception('Password and Confirm password do not match');
+        if ($username != $data['username']) {
+            if ($this->exists($data['username'])) {
+                throw new Exception('Username is taken');
+            }
         }
 
-       if ($newUser == $username) {
-           $users[$newUser] = [
-               'password' => $data['password'],
-               'email' => $data['email'],
-               'birthday' => $data['birthday'],
-               'full_name' => $this->data[$username]['full_name'],
-               'role' => $role
-           ];
-       } else {
-           if(array_key_exists($newUser, $this->data)) {
-               throw new Exception('Username is already taken');
-           }
+        $sql = "
+            UPDATE
+                users
+            SET
+                username = ?,
+                email = ?,
+                birthday = ?,
+                full_name = ?, 
+            WHERE
+                username = ?
+        ";
 
-           $this->data[$newUser] = [
-               'password' => $data['password'],
-               'email' => $data['email'],
-               'birthday' => $data['birthday'],
-               'full_name' => $this->data[$username]['full_name'],
-               'role' => $role
-           ];
+        $editStmt = $this->db->prepare($sql);
 
-           unset($this->data[$username]);
-       }
+        $editStmt->execute([
+            $data['username'],
+            $data['email'],
+            $data['birthday'],
+            $data['full_name'],
+            $data['username']
+        ]);
 
-       $userInfo['user'] = $newUser;
+        $userInfo['username'] = $data['username'];
 
-       $usersAsText = var_export($this->data, true);
-
-       $declaration = '<?php' . PHP_EOL . '$users = ' . $usersAsText . ';';
-
-       $result = file_put_contents('database.php', $declaration);
-
-       return $result !== false;
+        return $editStmt->rowCount() > 0;
     }
 
-    public function register (array $data) : bool
+    public function register(string $username, string $password, string $email, string $full_name, DateTime $birthday) : bool
     {
-        $user = isset($data['username']) ? $data['username'] : '';
-        $password = isset($data['password']) ? $data['password'] : '';
-        $passwordConfirm = isset($data['confirm']) ? $data['confirm'] : '';
-        $email = isset($data['email']) ? $data['email'] : '';
-        $birthday = isset($data['birthday']) ? $data['birthday'] : '';
-        $fullName = isset($data['full_name']) ? $data['full_name'] : '';
-
-        if (empty($user)) {
-            throw new Exception('Please enter username');
+        if ($this->exists($username)) {
+            throw new Exception('Username already taken');
         }
 
-        if (empty($password)) {
-            throw new Exception('Please enter password');
+        $day = $birthday->format('Y-m-d H-i-s');
+
+        $sql = "
+            INSERT INTO
+                users
+            (username, password, email, full_name, birthday, is_active)
+            VALUES 
+            (?, ?, ?, ?, ?, ?)
+        ";
+
+        $registerStmt = $this->db->prepare($sql);
+
+        $registerStmt->execute([
+            $username,
+            password_hash($password, PASSWORD_BCRYPT),
+            $email,
+            $full_name,
+            $day,
+            self::IS_ACTIVE
+        ]);
+
+        return $registerStmt->rowCount() > 0;
+    }
+
+    public function login (string $username, string $password) : bool
+    {
+        $sql = "
+            SELECT
+                username,
+                password
+            FROM 
+                users
+            WHERE 
+               username = ?
+        ";
+
+        $userStmt = $this->db->prepare($sql);
+
+        $userStmt->execute([$username]);
+
+        if ($userStmt->rowCount() <= 0) {
+            return false;
         }
 
-        if (empty($fullName)) {
-            throw new Exception('Please enter full name');
+        $result = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        $hashPassword = $result['password'];
+
+        if (password_verify($password, $hashPassword)) {
+            return true;
         }
 
-        if ($password != $passwordConfirm) {
-            throw new Exception('Password and Confirm password do not match');
-        }
+        return false;
+    }
 
-        if(array_key_exists($user, $this->data)) {
-            throw new Exception('This username already exist');
-        }
+    private function exists(string $username) : bool
+    {
+        $sql = "
+                SELECT
+                    *
+                FROM
+                    users
+                WHERE
+                    username = ?
+            ";
 
-        $this->data[$user] = [
-            'password' => $password,
-            'email' => $email,
-            'birthday' => $birthday,
-            'full_name' => $fullName,
-            'role' => 'user'
-        ];
+        $statement = $this->db->prepare($sql);
 
-        $usersAsText = var_export($this->data, true);
+        $statement->execute([$username]);
 
-        $declaration = '<?php' . PHP_EOL . '$users = ' . $usersAsText . ';';
-
-        $result = file_put_contents('database.php', $declaration);
-
-        return $result !== false;
+        return $statement->rowCount() > 0;
     }
 }
